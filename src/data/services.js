@@ -1,0 +1,17 @@
+export const serviceCategories = [
+  { id: 'ac', name: 'صيانة التكييف', icon: '❄️', color: '#0EA5E9', description: 'صيانة وتنظيف وتركيب جميع أنواع التكييف' },
+  { id: 'plumbing', name: 'سباكة', icon: '🔧', color: '#06B6D4', description: 'تمديد وصيانة وتسليك مجاري' },
+  { id: 'electrical', name: 'كهربائي', icon: '⚡', color: '#EAB308', description: 'تركيب وصيانة وكشف أعطال كهربائية' },
+  { id: 'cleaning', name: 'تنظيف منازل', icon: '🧹', color: '#8B5CF6', description: 'تنظيف شامل للمنازل والمكاتب' },
+  { id: 'tanks', name: 'تنظيف خزانات', icon: '🪣', color: '#3B82F6', description: 'تنظيف وتعقيم خزانات المياه' },
+  { id: 'insects', name: 'مكافحة حشرات', icon: '🦟', color: '#EF4444', description: 'رش ومكافحة جميع أنواع الحشرات' },
+  { id: 'carpentry', name: 'نجار وأبواب', icon: '🪵', color: '#D97706', description: 'نجارة وتركيب وإصلاح الأبواب والأثاث' },
+  { id: 'painting', name: 'دهان وديكور', icon: '🎨', color: '#EC4899', description: 'دهان داخلي وخارجي وأعمال الديكور' },
+  { id: 'appliances', name: 'صيانة أجهزة', icon: '📺', color: '#6366F1', description: 'صيانة الأجهزة الكهربائية والمنزلية' },
+  { id: 'gardens', name: 'حدائق وزراعة', icon: '🌿', color: '#22C55E', description: 'تنسيق وتصميم الحدائق والزراعة' },
+  { id: 'cameras', name: 'كاميرات مراقبة', icon: '📷', color: '#64748B', description: 'تركيب وصيانة كاميرات المراقبة' },
+  { id: 'satellite', name: 'ستلايت', icon: '📡', color: '#334155', description: 'تركيب وضبط الستلايت والريسيفر' },
+  { id: 'moving', name: 'نقل عفش', icon: '🚛', color: '#F97316', description: 'نقل وتغليف الأثاث والعفش بأمان' },
+  { id: 'general', name: 'صيانة عامة', icon: '🔨', color: '#78716C', description: 'أعمال صيانة عامة ومتنوعة' },
+  { id: 'more', name: 'المزيد', icon: '···', color: '#94A3B8', description: 'خدمات متنوعة أخرى' },
+]

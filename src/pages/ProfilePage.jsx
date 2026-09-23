@@ -1,0 +1,217 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/common/Header';
+import BottomNav from '../components/common/BottomNav';
+import { useApp } from '../context/AppContext';
+import { 
+  User, 
+  GraduationCap, 
+  Bus, 
+  Printer, 
+  Building2, 
+  QrCode, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Award,
+  ChevronLeft,
+  Phone,
+  LogOut,
+  Sparkles,
+  LogIn
+} from 'lucide-react';
+
+export default function ProfilePage() {
+  const navigate = useNavigate();
+  const { student, activeBookings, isLoggedIn, logoutStudent } = useApp();
+
+  return (
+    <div className="bg-slate-50 min-h-screen page-container pb-24 fade-in" dir="rtl">
+      <Header title="حساب الطالب وبطاقتي" showBack={false} />
+
+      <div className="px-4 pt-3 space-y-4">
+        
+        {/* 💳 Digital University ID Card */}
+        <div className="relative rounded-3xl bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 text-white p-5 shadow-2xl space-y-4 overflow-hidden border border-white/10">
+          
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <GraduationCap size={18} />
+              </div>
+              <div>
+                <h3 className="font-black text-xs tracking-wider">جامعة ميسان</h3>
+                <span className="text-[10px] text-blue-200">جمهورية العراق • وزارة التعليم العالي</span>
+              </div>
+            </div>
+
+            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-extrabold px-2 py-0.5 rounded-full border border-emerald-500/30">
+              بطاقة رسمية موثقة ✓
+            </span>
+          </div>
+
+          <div className="flex gap-3.5 items-center">
+            <img 
+              src={student.avatar} 
+              alt={student.name} 
+              className="w-16 h-16 rounded-2xl object-cover ring-2 ring-blue-400 shadow-md"
+            />
+            <div className="space-y-0.5">
+              <h2 className="font-black text-base text-white">{student.name}</h2>
+              <p className="text-xs text-blue-200">{student.college} • {student.department}</p>
+              <p className="text-[11px] text-blue-300">{student.stage} • السكن: {student.fromDistrict}</p>
+            </div>
+          </div>
+
+          {/* Barcode & ID row */}
+          <div className="p-3 bg-white/10 rounded-2xl flex items-center justify-between backdrop-blur-md">
+            <div>
+              <span className="text-[10px] text-blue-300 block">الرقم الجامعي (ID):</span>
+              <span className="font-mono font-bold text-xs text-white">{student.studentId}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-blue-300 block">المعدل التراكمي:</span>
+              <span className="font-bold text-xs text-amber-300">{student.gpa}</span>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-white p-1 flex items-center justify-center text-slate-900 shadow">
+              <QrCode size={24} />
+            </div>
+          </div>
+
+          {/* Subtle watermark */}
+          <div className="absolute -left-6 -bottom-6 w-32 h-32 rounded-full bg-blue-500/10 blur-xl pointer-events-none" />
+        </div>
+
+        {/* 📦 Active Bookings & Orders */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-extrabold text-xs text-slate-800">طلباتي والاشتراكات النشطة ({activeBookings.length}):</h3>
+          </div>
+
+          {activeBookings.map(bk => (
+            <div 
+              key={bk.id}
+              className="bg-white rounded-2xl border border-slate-100 p-3.5 shadow-sm space-y-2"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white bg-emerald-600">
+                    <Printer size={16} />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-xs text-slate-900">{bk.title}</h4>
+                    <span className="text-[10px] text-slate-400 block">{bk.period}</span>
+                  </div>
+                </div>
+
+                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md">
+                  {bk.status}
+                </span>
+              </div>
+
+              <div className="p-2 bg-slate-50 rounded-xl text-[11px] text-slate-600 space-y-1">
+                {bk.address && <p>• عنوان التوصيل: {bk.address}</p>}
+                {bk.specs && <p>• تفاصيل الملازم: {bk.specs}</p>}
+                {bk.totalPrice && <p>• التكلفة الإجمالية: {bk.totalPrice.toLocaleString()} د.ع</p>}
+                {bk.driver && <p>• المندوب / السائق: {bk.driver}</p>}
+                {bk.pickup && <p>• نقطة الاستلام: {bk.pickup}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Account Menu */}
+        <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 shadow-sm overflow-hidden text-xs">
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full p-3.5 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-2 font-bold">
+              <span>🎓</span>
+              <span>تعديل البيانات الأكاديمية والكلية</span>
+            </div>
+            <ChevronLeft size={16} className="text-slate-400" />
+          </button>
+
+          <button
+            onClick={() => alert('سجل الملازم والطلبات السابقة محفوظ في حسابك الجامعي')}
+            className="w-full p-3.5 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-2 font-bold">
+              <span>📚</span>
+              <span>سجل الملازم والطلبات السابقة</span>
+            </div>
+            <ChevronLeft size={16} className="text-slate-400" />
+          </button>
+
+          <button
+            onClick={() => alert('لا توجد إشعارات أو تنبيهات جديدة')}
+            className="w-full p-3.5 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-2 font-bold">
+              <span>🔔</span>
+              <span>إشعارات الطلبات والتنبيهات</span>
+            </div>
+            <ChevronLeft size={16} className="text-slate-400" />
+          </button>
+
+          {/* Switch Account or Login/Logout Button */}
+          {student.isGuest ? (
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full p-3.5 flex items-center justify-between text-blue-700 hover:bg-blue-50 transition-colors bg-blue-50/50"
+            >
+              <div className="flex items-center gap-2 font-extrabold">
+                <LogIn size={16} className="text-blue-600" />
+                <span>تسجيل الدخول أو إنشاء حساب طالب جديد</span>
+              </div>
+              <ChevronLeft size={16} className="text-blue-500" />
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                if (window.confirm('هل تريد تسجيل الخروج أو تبديل الحساب؟')) {
+                  logoutStudent();
+                  navigate('/login');
+                }
+              }}
+              className="w-full p-3.5 flex items-center justify-between text-rose-600 hover:bg-rose-50 transition-colors"
+            >
+              <div className="flex items-center gap-2 font-extrabold">
+                <LogOut size={16} className="text-rose-500" />
+                <span>تسجيل الخروج / تبديل الحساب</span>
+              </div>
+              <ChevronLeft size={16} className="text-rose-400" />
+            </button>
+          )}
+        </div>
+
+        {/* Admin Dashboard Entry Card */}
+        <div 
+          onClick={() => navigate('/admin')}
+          className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer border border-slate-800 active:scale-98 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600/30 text-blue-400 flex items-center justify-center text-lg border border-blue-500/30">
+              ⚙️
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-xs">لوحة تحكم إدارة طالب ميسان</span>
+                <span className="bg-emerald-500/20 text-emerald-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">
+                  خاص بالإدارة
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                إدارة الملازم، سوق المستعمل، الوظائف، والطلبات
+              </p>
+            </div>
+          </div>
+          <ChevronLeft size={16} className="text-slate-400" />
+        </div>
+
+      </div>
+
+      <BottomNav activeTab="profile" />
+    </div>
+  );
+}
