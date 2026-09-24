@@ -125,9 +125,23 @@ export function AppProvider({ children }) {
     setIsLoggedIn(true);
 
     try {
-      // Asynchronously backup to Supabase
-      await supabase.from('app_sync_state').upsert([
-        { key: 'student_' + newStudent.phone, value: newStudent, updated_at: new Date().toISOString() }
+      // Asynchronously backup to Supabase orders table
+      await supabase.from('orders').upsert([
+        {
+          id: 'STUDENT-' + newStudent.phone,
+          student_name: newStudent.name,
+          phone: newStudent.phone,
+          college: newStudent.college || '',
+          stage: newStudent.stage || '',
+          delivery_type: 'student_profile',
+          delivery_address: newStudent.fromDistrict || '',
+          notes: JSON.stringify(newStudent),
+          items: [],
+          subtotal: 0,
+          delivery_fee: 0,
+          total_price: 0,
+          status: 'student_profile'
+        }
       ]);
     } catch (e) {
       console.error('Failed to sync new student to Supabase:', e);
@@ -166,20 +180,24 @@ export function AppProvider({ children }) {
     try {
       // 1. Try to fetch from Supabase
       const { data, error } = await supabase
-        .from('app_sync_state')
-        .select('value')
-        .eq('key', 'student_' + phone)
-        .single();
+        .from('orders')
+        .select('*')
+        .eq('id', 'STUDENT-' + phone)
+        .maybeSingle();
 
-      if (data && data.value) {
-        const found = data.value;
-        if (pin && found.pin !== pin && pin !== '1234') {
+      if (data && data.notes) {
+        try {
+          const found = JSON.parse(data.notes);
+          if (pin && found.pin !== pin && pin !== '1234') {
             return { success: false, error: 'الرمز السري غير صحيح' };
+          }
+          setStudent(found);
+          setIsLoggedIn(true);
+          localStorage.setItem('taleb_maysan_student', JSON.stringify(found));
+          return { success: true, student: found };
+        } catch (err) {
+          console.error('Error parsing profile notes:', err);
         }
-        setStudent(found);
-        setIsLoggedIn(true);
-        localStorage.setItem('taleb_maysan_student', JSON.stringify(found));
-        return { success: true, student: found };
       }
     } catch (e) {
       console.error('Error fetching student from Supabase:', e);

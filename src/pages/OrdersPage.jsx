@@ -23,6 +23,8 @@ export default function OrdersPage() {
           .from('orders')
           .select('*')
           .eq('phone', student.phone)
+          .neq('delivery_type', 'student_profile')
+          .neq('status', 'student_profile')
           .order('created_at', { ascending: false });
 
         if (!error && data) {

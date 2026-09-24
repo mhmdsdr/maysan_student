@@ -142,7 +142,12 @@ export function AppDataProvider({ children }) {
 
       const isCatalog = (type) => type === 'catalog_exam' || type?.startsWith('catalog_');
       const actualOrders = rows.filter(
-        (o) => !o.delivery_type?.startsWith('app_state_') && !isCatalog(o.delivery_type)
+        (o) =>
+          !o.delivery_type?.startsWith('app_state_') &&
+          !isCatalog(o.delivery_type) &&
+          o.delivery_type !== 'student_profile' &&
+          o.status !== 'app_state' &&
+          o.status !== 'student_profile'
       );
       setCloudOrders(actualOrders);
 
