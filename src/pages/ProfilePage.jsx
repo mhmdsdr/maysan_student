@@ -22,7 +22,21 @@ import {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { student, activeBookings, isLoggedIn, logoutStudent } = useApp();
+  const { student, activeBookings, isLoggedIn, logoutStudent, registerStudent } = useApp();
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editData, setEditData] = React.useState({
+    name: student?.name || '',
+    college: student?.college || '',
+    department: student?.department || '',
+    stage: student?.stage || '',
+    fromDistrict: student?.fromDistrict || ''
+  });
+
+  const handleSaveProfile = async () => {
+    if (!editData.name.trim()) return;
+    await registerStudent({ ...student, ...editData });
+    setIsEditing(false);
+  };
 
   React.useEffect(() => {
     if (!isLoggedIn || !student || student?.isGuest) {
@@ -132,7 +146,7 @@ export default function ProfilePage() {
         {/* Account Menu */}
         <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100 shadow-sm overflow-hidden text-xs">
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => setIsEditing(true)}
             className="w-full p-3.5 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-2 font-bold">
@@ -143,7 +157,7 @@ export default function ProfilePage() {
           </button>
 
           <button
-            onClick={() => alert('سجل الملازم والطلبات السابقة محفوظ في حسابك الجامعي')}
+            onClick={() => navigate('/orders')}
             className="w-full p-3.5 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-2 font-bold">
@@ -154,12 +168,12 @@ export default function ProfilePage() {
           </button>
 
           <button
-            onClick={() => alert('لا توجد إشعارات أو تنبيهات جديدة')}
+            onClick={() => navigate('/orders')}
             className="w-full p-3.5 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-2 font-bold">
               <span>🔔</span>
-              <span>إشعارات الطلبات والتنبيهات</span>
+              <span>تتبع الطلبات الجارية</span>
             </div>
             <ChevronLeft size={16} className="text-slate-400" />
           </button>
@@ -196,6 +210,46 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      {isEditing && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <h2 className="font-black text-slate-800 text-lg border-b border-slate-100 pb-2">تعديل البيانات الأكاديمية</h2>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-[11px] font-bold text-slate-500 mb-1 block">الاسم الثلاثي</label>
+                <input type="text" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#0D9488] focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold text-slate-500 mb-1 block">الكلية</label>
+                <input type="text" value={editData.college} onChange={e => setEditData({...editData, college: e.target.value})} className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#0D9488] focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold text-slate-500 mb-1 block">القسم</label>
+                <input type="text" value={editData.department} onChange={e => setEditData({...editData, department: e.target.value})} className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#0D9488] focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold text-slate-500 mb-1 block">المرحلة</label>
+                <input type="text" value={editData.stage} onChange={e => setEditData({...editData, stage: e.target.value})} className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#0D9488] focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold text-slate-500 mb-1 block">منطقة السكن</label>
+                <input type="text" value={editData.fromDistrict} onChange={e => setEditData({...editData, fromDistrict: e.target.value})} className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#0D9488] focus:outline-none" />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button onClick={handleSaveProfile} className="flex-1 bg-[#0D9488] text-white py-3 rounded-xl font-bold text-xs shadow-md shadow-teal-600/20">
+                حفظ التعديلات
+              </button>
+              <button onClick={() => setIsEditing(false)} className="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs">
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav activeTab="profile" />
     </div>

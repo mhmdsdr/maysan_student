@@ -1,29 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import BottomNav from '../components/common/BottomNav';
-import { Package, Clock, ChevronLeft, Star } from 'lucide-react';
+import { Package, Clock, ChevronLeft, Star, Loader2 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import { supabase } from '../lib/supabaseClient';
 
 export default function OrdersPage() {
   const navigate = useNavigate();
+  const { student } = useApp();
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'done'
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockOrders = [
-    { id: 'D-001', type: 'مندوب', from: 'حي المعلمين', to: 'حي القاهرة', status: 'pending', statusLabel: 'بانتظار القبول', time: 'منذ 5 دقائق', total: 5400, category: 'delivery' },
-    { id: 'S-002', type: 'صيانة تكييف', provider: 'فني تكييف محمد علي', status: 'accepted', statusLabel: 'تم القبول', time: 'منذ 20 دقيقة', total: 10000, category: 'service' },
-    { id: 'F-003', type: 'طلب طعام', provider: 'مطعم السلطان', status: 'done', statusLabel: 'تم الإنجاز', time: 'أمس', total: 18000, category: 'food' },
-    { id: 'D-004', type: 'نقل عفش', from: 'حي الأطباء', to: 'حي الجمعيات', status: 'done', statusLabel: 'تم الإنجاز', time: 'منذ يومين', total: 25000, category: 'delivery' },
-  ];
+  useEffect(() => {
+    if (!student?.phone) return;
+
+    async function fetchMyOrders() {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('phone', student.phone)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          setOrders(data);
+        }
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMyOrders();
+  }, [student?.phone]);
 
   const statusStyles = {
-    pending: 'bg-yellow-100 text-yellow-700',
-    accepted: 'bg-teal-100 text-teal-700',
-    onway: 'bg-blue-100 text-blue-700',
-    done: 'bg-green-100 text-green-700',
+    'قيد الطباعة والتجهيز 🖨️': 'bg-yellow-100 text-yellow-700',
+    'تم الإنجاز': 'bg-green-100 text-green-700',
+    'قيد المعالجة': 'bg-blue-100 text-blue-700',
   };
 
-  const activeOrders = mockOrders.filter(o => o.status !== 'done');
-  const pastOrders = mockOrders.filter(o => o.status === 'done');
+  const isDone = (status) => status?.includes('تم') || status?.includes('مكتمل') || status?.includes('انجاز');
+
+  const activeOrders = orders.filter(o => !isDone(o.status));
+  const pastOrders = orders.filter(o => isDone(o.status));
 
   const displayOrders = activeTab === 'active' ? activeOrders : pastOrders;
 
@@ -48,27 +72,41 @@ export default function OrdersPage() {
       </div>
 
       <div className="px-4 mt-4 space-y-3">
-        {displayOrders.length > 0 ? (
-          displayOrders.map(order => (
+        {loading ? (
+          <div className="py-20 flex flex-col items-center justify-center">
+            <Loader2 size={36} className="text-[#0D9488] animate-spin mb-4" />
+            <p className="text-sm font-bold text-gray-500">جاري تحميل الطلبات...</p>
+          </div>
+        ) : displayOrders.length > 0 ? (
+          displayOrders.map(order => {
+            const isOrderDone = isDone(order.status);
+            return (
             <div key={order.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex gap-2">
-                  <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold uppercase tracking-wider">{order.id}</span>
-                  <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${statusStyles[order.status]}`}>{order.statusLabel}</span>
+                  <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold uppercase tracking-wider">{String(order.id).slice(-6)}</span>
+                  <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${statusStyles[order.status] || 'bg-gray-100 text-gray-700'}`}>{order.status || 'قيد المعالجة'}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-400 font-medium">
-                  <Clock size={12} /> {order.time}
+                <div className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                  <Clock size={12} /> 
+                  <span dir="ltr">{new Date(order.created_at).toLocaleDateString('en-GB')} {new Date(order.created_at).toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-teal-600">
+                <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-teal-600 shrink-0">
                   <Package size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800">{order.type}</h3>
+                  <h3 className="font-bold text-gray-800 text-sm">
+                    {order.delivery_type === 'direct_delivery' ? 'طلب طباعة وملازم' : 
+                     order.delivery_type === 'mandoob' ? 'طلب مندوب' :
+                     order.delivery_type === 'kai' ? 'طلب غسيل وكي' :
+                     order.delivery_type === 'stota' ? 'ستوتة نقل' :
+                     order.delivery_type === 'naql' ? 'نقل عفش' : 'طلب'}
+                  </h3>
                   <p className="text-xs text-gray-500 mt-1 font-medium">
-                    {order.provider ? order.provider : `من ${order.from} إلى ${order.to}`}
+                    التوصيل إلى: {order.delivery_address || order.college || 'غير محدد'}
                   </p>
                 </div>
               </div>
@@ -76,9 +114,9 @@ export default function OrdersPage() {
               <div className="flex items-center justify-between pt-3 border-t border-dashed border-gray-100">
                 <div>
                   <span className="text-xs text-gray-400 block mb-0.5">المجموع</span>
-                  <span className="text-[#0D9488] font-black">{order.total.toLocaleString()} د.ع</span>
+                  <span className="text-[#0D9488] font-black">{(order.total_price || 0).toLocaleString()} د.ع</span>
                 </div>
-                {order.status !== 'done' ? (
+                {!isOrderDone ? (
                   <button 
                     onClick={() => navigate('/tracking/' + order.id)}
                     className="text-sm font-bold border border-[#0D9488] text-[#0D9488] px-4 py-2 rounded-xl flex items-center gap-1 hover:bg-teal-50 transition-colors"
@@ -92,7 +130,7 @@ export default function OrdersPage() {
                 )}
               </div>
 
-              {order.status === 'done' && (
+              {isOrderDone && (
                 <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
                   <span className="text-xs font-semibold text-gray-500">قيّم الخدمة</span>
                   <div className="flex gap-1">
@@ -103,7 +141,7 @@ export default function OrdersPage() {
                 </div>
               )}
             </div>
-          ))
+          )})
         ) : (
           <div className="py-20 flex flex-col items-center justify-center text-center">
             <div className="text-5xl mb-4 opacity-50">📦</div>

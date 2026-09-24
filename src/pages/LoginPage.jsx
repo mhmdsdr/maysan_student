@@ -104,41 +104,50 @@ export default function LoginPage() {
   const [isSuccessModal, setIsSuccessModal] = useState(false);
   const [createdStudentName, setCreatedStudentName] = useState('');
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Handle Login Submit
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
+    setIsSubmitting(true);
 
     if (!loginPhone.trim()) {
       setLoginError('يرجى كتابة رقم هاتفك للمتابعة');
+      setIsSubmitting(false);
       return;
     }
 
     if (loginPhone.length < 10) {
       setLoginError('يرجى إدخال رقم هاتف عراقي صالح (مثال: 07701234567)');
+      setIsSubmitting(false);
       return;
     }
 
-    const res = loginStudent(loginPhone.trim(), loginPin.trim());
+    const res = await loginStudent(loginPhone.trim(), loginPin.trim());
+    setIsSubmitting(false);
     if (res && res.success) {
       navigate('/');
     } else {
-      setLoginError('تعذر تسجيل الدخول، يرجى المحاولة مرة أخرى.');
+      setLoginError(res?.error || 'تعذر تسجيل الدخول، يرجى المحاولة مرة أخرى.');
     }
   };
 
   // Handle Register Submit
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setRegError('');
+    setIsSubmitting(true);
 
     if (!name.trim()) {
       setRegError('يرجى إدخال الاسم الثلاثي للطالب');
+      setIsSubmitting(false);
       return;
     }
 
     if (!regPhone.trim() || regPhone.length < 10) {
       setRegError('يرجى إدخال رقم هاتف عراقي صالح (10 أو 11 رقم)');
+      setIsSubmitting(false);
       return;
     }
 
@@ -154,13 +163,19 @@ export default function LoginPage() {
       gpa: 'طالب مستمر',
     };
 
-    const created = registerStudent(newStudentData);
-    setCreatedStudentName(created.name);
-    setIsSuccessModal(true);
+    const created = await registerStudent(newStudentData);
+    setIsSubmitting(false);
+    
+    if (created) {
+      setCreatedStudentName(created.name);
+      setIsSuccessModal(true);
 
-    setTimeout(() => {
-      navigate('/');
-    }, 1800);
+      setTimeout(() => {
+        navigate('/');
+      }, 1800);
+    } else {
+      setRegError('فشل إنشاء الحساب، يرجى المحاولة مرة أخرى.');
+    }
   };
 
   // Handle Image Upload with automatic Canvas compression to prevent exceeding localStorage quota

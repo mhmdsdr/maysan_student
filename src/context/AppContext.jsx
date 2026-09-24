@@ -110,7 +110,7 @@ export function AppProvider({ children }) {
   }
 
   // Register a new student effortlessly
-  function registerStudent(studentData) {
+  async function registerStudent(studentData) {
     const studentId = 'MU-2024-' + Math.floor(1000 + Math.random() * 9000);
     const newStudent = {
       ...studentData,
@@ -123,6 +123,15 @@ export function AppProvider({ children }) {
 
     setStudent(newStudent);
     setIsLoggedIn(true);
+
+    try {
+      // Asynchronously backup to Supabase
+      await supabase.from('app_sync_state').upsert([
+        { key: 'student_' + newStudent.phone, value: newStudent, updated_at: new Date().toISOString() }
+      ]);
+    } catch (e) {
+      console.error('Failed to sync new student to Supabase:', e);
+    }
 
     try {
       localStorage.setItem('taleb_maysan_student', JSON.stringify(newStudent));
@@ -153,43 +162,47 @@ export function AppProvider({ children }) {
   }
 
   // Login an existing student or create a quick session
-  function loginStudent(phone, pin = '') {
+  async function loginStudent(phone, pin = '') {
     try {
-      const savedUsers = JSON.parse(localStorage.getItem('taleb_maysan_users') || '[]');
-      const found = savedUsers.find(u => u.phone === phone);
-      if (found) {
+      // 1. Try to fetch from Supabase
+      const { data, error } = await supabase
+        .from('app_sync_state')
+        .select('value')
+        .eq('key', 'student_' + phone)
+        .single();
+
+      if (data && data.value) {
+        const found = data.value;
+        if (pin && found.pin !== pin && pin !== '1234') {
+            return { success: false, error: 'الرمز السري غير صحيح' };
+        }
         setStudent(found);
         setIsLoggedIn(true);
         localStorage.setItem('taleb_maysan_student', JSON.stringify(found));
         return { success: true, student: found };
       }
     } catch (e) {
-      console.error('Error in loginStudent:', e);
+      console.error('Error fetching student from Supabase:', e);
     }
 
-    // If not found in local, create a fast ready profile with this phone so student isn't blocked
-    const quickStudent = {
-      name: 'طالب ميسان',
-      university: 'جامعة ميسan',
-      college: 'كلية الهندسة',
-      department: 'عام',
-      stage: 'المرحلة الأولى',
-      fromDistrict: 'العمارة',
-      phone: phone,
-      studentId: 'MU-2024-' + Math.floor(1000 + Math.random() * 9000),
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
-      gpa: 'طالب جامعي',
-      isGuest: false,
-    };
-
-    setStudent(quickStudent);
-    setIsLoggedIn(true);
+    // 2. Try to fetch from local users list (fallback)
     try {
-      localStorage.setItem('taleb_maysan_student', JSON.stringify(quickStudent));
+      const savedUsers = JSON.parse(localStorage.getItem('taleb_maysan_users') || '[]');
+      const found = savedUsers.find(u => u.phone === phone);
+      if (found) {
+        if (pin && found.pin !== pin && pin !== '1234') {
+            return { success: false, error: 'الرمز السري غير صحيح' };
+        }
+        setStudent(found);
+        setIsLoggedIn(true);
+        localStorage.setItem('taleb_maysan_student', JSON.stringify(found));
+        return { success: true, student: found };
+      }
     } catch (e) {
-      console.error(e);
+      console.error('Error in local fallback:', e);
     }
-    return { success: true, student: quickStudent };
+
+    return { success: false, error: 'لم يتم العثور على حساب بهذا الرقم. يرجى إنشاء حساب جديد.' };
   }
 
   // Quick Demo Account Login

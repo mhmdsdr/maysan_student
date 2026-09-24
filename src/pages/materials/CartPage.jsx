@@ -23,9 +23,9 @@ export default function CartPage() {
   const { cart, removeItem, updateQuantity, clearCart, getTotal } = useCart();
   const { student, addBooking } = useApp();
 
-  const [studentName, setStudentName] = useState(student?.name || 'طالب ميسان');
-  const [studentPhone, setStudentPhone] = useState('07701234567');
-  const [deliveryAddress, setDeliveryAddress] = useState('جامعة ميسان - موقع 110 (باب كلية الهندسة)');
+  const [studentName, setStudentName] = useState(student?.name || '');
+  const [studentPhone, setStudentPhone] = useState(student?.phone || '');
+  const [deliveryAddress, setDeliveryAddress] = useState(student?.fromDistrict || '');
   const [deliveryNote, setDeliveryNote] = useState('');
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
