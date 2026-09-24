@@ -65,10 +65,10 @@ export default function Header({
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-black text-slate-900 text-base leading-none">طالب ميسان</span>
+                  <span className="font-black text-slate-900 text-base leading-none">طلاب ميسان</span>
                   <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none">جامعي</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">{student?.college || 'جامعة ميسان'}</span>
+                <span className="text-[10px] text-slate-400 font-medium">{student?.college || 'جامعات ميسان'}</span>
               </div>
             </div>
           )}

@@ -238,7 +238,7 @@ export default function LoginPage() {
           </button>
           
           <span className="text-[11px] font-bold bg-white/15 px-3 py-1 rounded-full text-blue-200 border border-white/10">
-            بوابة جامعة ميسان الرسمية
+            بوابة جامعات ميسان الرسمية
           </span>
         </div>
 
@@ -248,9 +248,9 @@ export default function LoginPage() {
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-              طالب ميسان
+              طلاب ميسان
               <span className="text-xs bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-md">
-                2024
+                2026-2027
               </span>
             </h1>
             <p className="text-xs text-blue-200 mt-0.5 font-medium">
