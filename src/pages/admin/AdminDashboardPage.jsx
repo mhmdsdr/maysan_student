@@ -250,28 +250,40 @@ export default function AdminDashboardPage() {
             <Lock size={28} />
           </div>
           <h2 className="text-lg font-black">لوحة تحكم إدارة طالب ميسان</h2>
-          <p className="text-xs text-slate-400">أدخل الرمز السري للوصول إلى صلاحيات الإدارة</p>
+          <p className="text-xs text-slate-400">أدخل الرمز السري للمتابعة</p>
           
           <input 
             type="password"
             value={pin}
             onChange={e => setPin(e.target.value)}
-            placeholder="الرمز السري (الافتراضي: 2026)"
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                if (pin === 'ms@7733' || pin === 'admin') {
+                  sessionStorage.setItem('taleb_maysan_admin', '1');
+                  setIsAuthenticated(true);
+                } else {
+                  alert('الرمز السري غير صحيح');
+                  setPin('');
+                }
+              }
+            }}
+            placeholder="••••••••"
             className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-center text-sm tracking-widest text-white focus:outline-none focus:border-blue-500"
           />
 
           <button
             onClick={() => {
-              if (pin === '2026' || pin === 'admin') {
+              if (pin === 'ms@7733' || pin === 'admin') {
                 sessionStorage.setItem('taleb_maysan_admin', '1');
                 setIsAuthenticated(true);
               } else {
                 alert('الرمز السري غير صحيح');
+                setPin('');
               }
             }}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs transition-colors"
           >
-            دخول لوحة الإدارة 🔓
+            دخول 🔓
           </button>
         </div>
       </div>

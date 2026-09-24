@@ -32,12 +32,23 @@ const GUEST_STUDENT = {
 };
 
 export function AppProvider({ children }) {
-  // Load saved student - if not logged in, user starts as null (must register/login)
+  // Load saved student - clear any old demo/test data so real users must register
   const [student, setStudent] = useState(() => {
     try {
       const saved = localStorage.getItem('taleb_maysan_student');
       if (saved) {
         const parsed = JSON.parse(saved);
+        // Clear demo account or guest account — must be a real registered student
+        const isDemoAccount = (
+          parsed?.phone === '07801234567' ||
+          parsed?.studentId === 'MU-2022-8419' ||
+          parsed?.isGuest === true ||
+          !parsed?.phone
+        );
+        if (isDemoAccount) {
+          localStorage.removeItem('taleb_maysan_student');
+          return null;
+        }
         if (parsed && !parsed.isGuest) return parsed;
       }
     } catch (e) {
@@ -51,6 +62,13 @@ export function AppProvider({ children }) {
       const saved = localStorage.getItem('taleb_maysan_student');
       if (saved) {
         const parsed = JSON.parse(saved);
+        const isDemoAccount = (
+          parsed?.phone === '07801234567' ||
+          parsed?.studentId === 'MU-2022-8419' ||
+          parsed?.isGuest === true ||
+          !parsed?.phone
+        );
+        if (isDemoAccount) return false;
         return Boolean(parsed && !parsed.isGuest);
       }
       return false;
