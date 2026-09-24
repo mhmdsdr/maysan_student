@@ -32,21 +32,28 @@ const GUEST_STUDENT = {
 };
 
 export function AppProvider({ children }) {
-  // Load saved student or default demo student
+  // Load saved student - if not logged in, user starts as null (must register/login)
   const [student, setStudent] = useState(() => {
     try {
       const saved = localStorage.getItem('taleb_maysan_student');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && !parsed.isGuest) return parsed;
+      }
     } catch (e) {
       console.error('Error reading student profile from localStorage:', e);
     }
-    return DEFAULT_DEMO_STUDENT;
+    return null;
   });
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     try {
       const saved = localStorage.getItem('taleb_maysan_student');
-      return !!saved;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return Boolean(parsed && !parsed.isGuest);
+      }
+      return false;
     } catch {
       return false;
     }

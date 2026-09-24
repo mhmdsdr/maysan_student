@@ -24,6 +24,16 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { student, activeBookings, isLoggedIn, logoutStudent } = useApp();
 
+  React.useEffect(() => {
+    if (!isLoggedIn || !student || student?.isGuest) {
+      navigate('/login', { replace: true });
+    }
+  }, [isLoggedIn, student, navigate]);
+
+  if (!student || !isLoggedIn) {
+    return null;
+  }
+
   return (
     <div className="bg-slate-50 min-h-screen page-container pb-24 fade-in" dir="rtl">
       <Header title="حساب الطالب وبطاقتي" showBack={false} />
@@ -183,30 +193,6 @@ export default function ProfilePage() {
               <ChevronLeft size={16} className="text-rose-400" />
             </button>
           )}
-        </div>
-
-        {/* Admin Dashboard Entry Card */}
-        <div 
-          onClick={() => navigate('/admin')}
-          className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer border border-slate-800 active:scale-98 transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600/30 text-blue-400 flex items-center justify-center text-lg border border-blue-500/30">
-              ⚙️
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xs">لوحة تحكم إدارة طالب ميسان</span>
-                <span className="bg-emerald-500/20 text-emerald-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">
-                  خاص بالإدارة
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                إدارة الملازم، سوق المستعمل، الوظائف، والطلبات
-              </p>
-            </div>
-          </div>
-          <ChevronLeft size={16} className="text-slate-400" />
         </div>
 
       </div>

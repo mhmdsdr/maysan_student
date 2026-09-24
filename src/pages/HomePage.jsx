@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import BottomNav from '../components/common/BottomNav';
@@ -16,14 +16,31 @@ import {
   Sparkles,
   CheckCircle2,
   FileEdit,
-  Truck,
-  Shield
+  Truck
 } from 'lucide-react';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { student } = useApp();
+  const { student, isLoggedIn } = useApp();
   const { announcements } = useAppData();
+
+  // If user has not created an account or logged in, immediately redirect to /login
+  useEffect(() => {
+    if (!isLoggedIn || !student || student?.isGuest) {
+      navigate('/login', { replace: true });
+    }
+  }, [isLoggedIn, student, navigate]);
+
+  if (!student || !isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white p-4" dir="rtl">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-bold text-slate-300">جارٍ نقلك لإنشاء حساب الطالب...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen page-container pb-24 fade-in" dir="rtl">
@@ -44,15 +61,9 @@ export default function HomePage() {
                 <div>
                   <div className="flex items-center gap-1.5">
                     <h2 className="font-extrabold text-base leading-tight">{student.name}</h2>
-                    {student.isGuest ? (
-                      <span className="bg-amber-500/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
-                        وضع الزائر
-                      </span>
-                    ) : (
-                      <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-0.5">
-                        <CheckCircle2 size={10} /> طالب موثق
-                      </span>
-                    )}
+                    <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-0.5">
+                      <CheckCircle2 size={10} /> طالب موثق
+                    </span>
                   </div>
                   <p className="text-xs text-blue-200 mt-0.5">{student.college} • {student.department}</p>
                 </div>
@@ -60,29 +71,11 @@ export default function HomePage() {
 
               <div className="flex items-center gap-1.5">
                 <button 
-                  onClick={() => navigate('/admin')} 
-                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] px-2.5 py-1.5 rounded-lg border border-emerald-500/30 transition-colors font-bold flex items-center gap-1"
-                  title="لوحة تحكم الإدارة"
+                  onClick={() => navigate('/profile')} 
+                  className="bg-white/10 hover:bg-white/20 text-xs px-3 py-1.5 rounded-lg border border-white/15 transition-colors font-bold"
                 >
-                  <Shield size={12} />
-                  <span>الإدارة ⚙️</span>
+                  بطاقتي 💳
                 </button>
-                
-                {student.isGuest ? (
-                  <button 
-                    onClick={() => navigate('/login')} 
-                    className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs px-2.5 py-1.5 rounded-lg transition-colors font-black flex items-center gap-1 shadow-sm"
-                  >
-                    <span>سجّل الآن 🎓</span>
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => navigate('/profile')} 
-                    className="bg-white/10 hover:bg-white/20 text-xs px-2.5 py-1.5 rounded-lg border border-white/15 transition-colors font-medium"
-                  >
-                    بطاقتي 💳
-                  </button>
-                )}
               </div>
             </div>
 
