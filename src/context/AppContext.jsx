@@ -126,17 +126,27 @@ export function AppProvider({ children }) {
 
     try {
       localStorage.setItem('taleb_maysan_student', JSON.stringify(newStudent));
-      // Also save to all registered users list
-      const savedUsers = JSON.parse(localStorage.getItem('taleb_maysan_users') || '[]');
-      const updatedUsers = [newStudent, ...savedUsers.filter(u => u.phone !== newStudent.phone)];
-      localStorage.setItem('taleb_maysan_users', JSON.stringify(updatedUsers));
-
-      // Asynchronously backup to Supabase
-      supabase.from('app_sync_state').upsert([
-        { key: 'student_' + newStudent.phone, value: newStudent, updated_at: new Date().toISOString() }
-      ]).then(() => {}).catch(() => {});
     } catch (e) {
-      console.error('Error saving new student:', e);
+      console.warn('Primary storage warning, using safe avatar fallback:', e);
+      const safeStudent = {
+        ...newStudent,
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'
+      };
+      try {
+        localStorage.setItem('taleb_maysan_student', JSON.stringify(safeStudent));
+      } catch (err) {
+        console.error('Failed to save student profile:', err);
+      }
+    }
+
+    try {
+      // Save lightweight entry to users list (without heavy base64 avatar to save storage)
+      const userMini = { ...newStudent, avatar: newStudent.avatar?.startsWith('data:') ? 'custom' : newStudent.avatar };
+      const savedUsers = JSON.parse(localStorage.getItem('taleb_maysan_users') || '[]');
+      const updatedUsers = [userMini, ...savedUsers.filter(u => u.phone !== newStudent.phone)];
+      localStorage.setItem('taleb_maysan_users', JSON.stringify(updatedUsers));
+    } catch (e) {
+      console.warn('Failed to update users index:', e);
     }
 
     return newStudent;

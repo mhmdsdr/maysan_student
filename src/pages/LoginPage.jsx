@@ -72,7 +72,14 @@ const AVATAR_OPTIONS = [
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { registerStudent, loginStudent, loginDemoStudent } = useApp();
+  const { registerStudent, loginStudent, isLoggedIn, student } = useApp();
+
+  // If already logged in, redirect immediately to home page
+  React.useEffect(() => {
+    if (isLoggedIn && student && !student.isGuest) {
+      navigate('/', { replace: true });
+    }
+  }, [isLoggedIn, student, navigate]);
 
   // Active tab: 'login' or 'register'
   const [activeTab, setActiveTab] = useState('register');
@@ -156,16 +163,45 @@ export default function LoginPage() {
     }, 1800);
   };
 
-  // Handle Image Upload for Custom Avatar
+  // Handle Image Upload with automatic Canvas compression to prevent exceeding localStorage quota
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCustomAvatar(reader.result);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 260;
+        const MAX_HEIGHT = 260;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Export as lightweight JPEG (typically 15-25 KB)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+        setCustomAvatar(compressedBase64);
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   return (

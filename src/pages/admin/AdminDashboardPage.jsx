@@ -239,7 +239,7 @@ export default function AdminDashboardPage() {
     { id: 'exams', label: 'بنك الأسئلة والامتحانات', icon: FileText, count: exams.length, color: 'text-purple-700 bg-purple-50' },
     { id: 'jobs', label: 'بنك الوظائف الطلابية والعمل الجزئي', icon: Briefcase, count: jobs.length, color: 'text-teal-700 bg-teal-50' },
     { id: 'discounts', label: 'عروض وخصومات الهوية الجامعية', icon: Percent, count: discounts.length, color: 'text-rose-700 bg-rose-50' },
-    { id: 'notices', label: 'لوحة إعلانات جامعة ميسان', icon: Bell, count: announcements.length, color: 'text-amber-700 bg-amber-50' },
+    { id: 'notices', label: 'لوحة إعلانات جامعات ميسان', icon: Bell, count: announcements.length, color: 'text-amber-700 bg-amber-50' },
   ];
 
   if (!isAuthenticated) {
@@ -1238,7 +1238,7 @@ export default function AdminDashboardPage() {
                       required 
                       value={noticeForm.title} 
                       onChange={e => setNoticeForm({ ...noticeForm, title: e.target.value })} 
-                      placeholder="اكتب تفاصيل الإعلان ليظهر فوراً على شريط أخبار جامعة ميسان في الصفحة الرئيسية..."
+                      placeholder="اكتب تفاصيل الإعلان ليظهر فوراً على شريط أخبار جامعات ميسان في الصفحة الرئيسية..."
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 leading-relaxed"
                     />
                   </div>

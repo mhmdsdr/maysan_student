@@ -228,7 +228,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-              <h3 className="font-extrabold text-slate-800 text-sm">لوحة إعلانات جامعة ميسان</h3>
+              <h3 className="font-extrabold text-slate-800 text-sm">لوحة إعلانات جامعات ميسان</h3>
             </div>
             <span className="text-[11px] text-blue-600 font-bold">رسمي 🏛️</span>
           </div>
