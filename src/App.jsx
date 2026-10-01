@@ -27,6 +27,7 @@ import PastExamsPage from './pages/tools/PastExamsPage';
 import GPACalculatorPage from './pages/tools/GPACalculatorPage';
 import StudentJobsPage from './pages/tools/StudentJobsPage';
 import StudentDiscountsPage from './pages/tools/StudentDiscountsPage';
+import AIAssistantPage from './pages/tools/AIAssistantPage';
 
 export default function App() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/cart" element={<CartPage />} />
 
               {/* Smart Student Utilities */}
+              <Route path="/ai" element={<AIAssistantPage />} />
               <Route path="/exams" element={<PastExamsPage />} />
               <Route path="/gpa" element={<GPACalculatorPage />} />
               <Route path="/jobs" element={<StudentJobsPage />} />

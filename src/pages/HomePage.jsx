@@ -16,7 +16,8 @@ import {
   Sparkles,
   CheckCircle2,
   FileEdit,
-  Truck
+  Truck,
+  Bot
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -123,6 +124,33 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* 🤖 AI Study Assistant Hero Banner */}
+        <div 
+          onClick={() => navigate('/ai')}
+          className="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-900 text-white rounded-2xl p-3.5 shadow-md shadow-purple-900/20 cursor-pointer active:scale-[0.99] transition-transform flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm shadow-inner flex-shrink-0">
+              <Sparkles size={22} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-sm leading-tight">المساعد الأكاديمي الذكي (AI)</span>
+                <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                  جديد مجاني ⚡
+                </span>
+              </div>
+              <p className="text-[11px] text-purple-200 mt-0.5">
+                تلخيص ملازم، ترجمة مصطلحات، وصياغة تقارير وبحوث بضغطة زر
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-xs font-bold bg-white/15 px-2.5 py-1.5 rounded-xl border border-white/20 flex-shrink-0">
+            <span>جرب الآن</span>
+            <ChevronLeft size={14} />
+          </div>
+        </div>
+
         {/* 🏛️ The 4 Major Portals Grid */}
         <div>
           <div className="flex items-center justify-between mb-2.5">
@@ -199,24 +227,25 @@ export default function HomePage() {
         {/* 🛠️ Smart Student Utilities */}
         <div>
           <h3 className="font-extrabold text-slate-800 text-sm mb-2.5">أدوات الطالب الذكية</h3>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-1.5">
             {[
-              { id: 'exams', title: 'بنك الأسئلة', icon: FileText, color: 'text-purple-600 bg-purple-50', path: '/exams' },
+              { id: 'ai', title: 'ذكاء AI', icon: Bot, color: 'text-purple-600 bg-purple-50', path: '/ai' },
+              { id: 'exams', title: 'بنك الأسئلة', icon: FileText, color: 'text-indigo-600 bg-indigo-50', path: '/exams' },
               { id: 'gpa', title: 'حاسبة المعدل', icon: Calculator, color: 'text-blue-600 bg-blue-50', path: '/gpa' },
               { id: 'jobs', title: 'عمل جزئي', icon: Briefcase, color: 'text-emerald-600 bg-emerald-50', path: '/jobs' },
-              { id: 'discounts', title: 'خصومات مطاعم', icon: Percent, color: 'text-rose-600 bg-rose-50', path: '/discounts' },
+              { id: 'discounts', title: 'خصومات', icon: Percent, color: 'text-rose-600 bg-rose-50', path: '/discounts' },
             ].map(tool => {
               const Icon = tool.icon;
               return (
                 <button
                   key={tool.id}
                   onClick={() => navigate(tool.path)}
-                  className="bg-white p-2.5 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center shadow-sm hover:shadow active:scale-95 transition-all"
+                  className="bg-white p-2 rounded-2xl border border-slate-100 flex flex-col items-center justify-center text-center shadow-sm hover:shadow active:scale-95 transition-all"
                 >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-1.5 ${tool.color}`}>
-                    <Icon size={18} />
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-1 ${tool.color}`}>
+                    <Icon size={16} />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-700 leading-tight">{tool.title}</span>
+                  <span className="text-[10px] font-bold text-slate-700 leading-tight">{tool.title}</span>
                 </button>
               );
             })}
