@@ -4,6 +4,7 @@ import Header from '../../components/common/Header';
 import { useCart } from '../../context/CartContext';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
+import { sendTelegramOrderNotification } from '../../lib/telegramNotifier';
 import { 
   Trash2, 
   Plus, 
@@ -104,6 +105,21 @@ export default function CartPage() {
         specs: `${cart.length} أصناف • إجمالي ${grandTotal.toLocaleString()} د.ع`,
         totalPrice: grandTotal,
         period: 'اليوم (توصيل مباشر خلال ساعتين)'
+      });
+
+      // Send Instant Telegram Notification to Admin / Shop
+      sendTelegramOrderNotification({
+        id: orderId,
+        student_name: studentName,
+        phone: studentPhone,
+        college: student?.college || 'جامعات ميسان',
+        stage: student?.stage || '',
+        delivery_address: deliveryAddress,
+        notes: deliveryNote,
+        items: cart,
+        subtotal: getTotal(),
+        delivery_fee: deliveryFee,
+        total_price: grandTotal,
       });
 
       setConfirmedOrderId(orderId);
