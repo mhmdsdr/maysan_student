@@ -65,7 +65,7 @@ export default function MaterialsPage() {
 
   // Pricing calculation
   const perPageRate = printType === 'bw' ? 50 : 80; // Dinars per page
-  const bindingRate = binding === 'staple' ? 750 : binding === 'spiral' ? 2000 : 2750;
+  const bindingRate = binding === 'staple' ? 0 : binding === 'spiral' ? 2000 : 2750;
   const printTotal = (pageCount * perPageRate) + bindingRate;
 
   // Report Generation State
@@ -334,7 +334,7 @@ export default function MaterialsPage() {
               <span className="text-xs font-bold text-slate-700 block mb-1.5">نوع التغليف والتجميع:</span>
               <div className="grid grid-cols-3 gap-2 text-xs font-bold">
                 {[
-                  { id: 'staple', label: 'كبس عادي', fee: 750 },
+                  { id: 'staple', label: 'كبس عادي', fee: 0 },
                   { id: 'spiral', label: 'سلك حلزوني', fee: 2000 },
                   { id: 'thermal', label: 'حراري مقوى', fee: 2750 },
                 ].map(b => (
@@ -349,7 +349,9 @@ export default function MaterialsPage() {
                     }`}
                   >
                     <span>{b.label}</span>
-                    <span className="block text-[10px] text-slate-400 mt-0.5">+{b.fee} د.ع</span>
+                    <span className="block text-[10px] text-slate-400 mt-0.5 font-bold">
+                      {b.fee === 0 ? 'مجاناً ✨' : `+${b.fee} د.ع`}
+                    </span>
                   </button>
                 ))}
               </div>
