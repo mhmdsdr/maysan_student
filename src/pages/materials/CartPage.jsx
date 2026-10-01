@@ -24,6 +24,7 @@ export default function CartPage() {
   const { cart, removeItem, updateQuantity, clearCart, getTotal } = useCart();
   const { student, addBooking } = useApp();
 
+  const [deliveryMode, setDeliveryMode] = useState('delivery'); // 'delivery' or 'pickup'
   const [studentName, setStudentName] = useState(student?.name || '');
   const [studentPhone, setStudentPhone] = useState(student?.phone || '');
   const [deliveryAddress, setDeliveryAddress] = useState(student?.fromDistrict || '');
@@ -32,12 +33,19 @@ export default function CartPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState('');
 
-  const deliveryFee = 2000;
-  const grandTotal = getTotal() + deliveryFee;
+  const subtotal = getTotal();
+  const isFreeDelivery = subtotal >= 15000;
+  const deliveryFee = deliveryMode === 'pickup' ? 0 : (isFreeDelivery ? 0 : 2000);
+  const grandTotal = subtotal + deliveryFee;
 
   async function handleCompleteOrder() {
-    if (!studentPhone.trim() || !deliveryAddress.trim()) {
-      alert('يرجى إدخال رقم الهاتف وعنوان التسليم');
+    if (!studentPhone.trim()) {
+      alert('يرجى إدخال رقم الهاتف للتواصل');
+      return;
+    }
+
+    if (deliveryMode === 'delivery' && !deliveryAddress.trim()) {
+      alert('يرجى تحديد مكان التسليم (باب الكلية أو العنوان)');
       return;
     }
 
@@ -58,11 +66,11 @@ export default function CartPage() {
           phone: studentPhone,
           college: student?.college || 'جامعة ميسان',
           stage: student?.stage || 'المرحلة الثالثة',
-          delivery_type: 'direct_delivery',
-          delivery_address: deliveryAddress,
+          delivery_type: deliveryMode === 'pickup' ? 'store_pickup' : 'direct_delivery',
+          delivery_address: deliveryMode === 'pickup' ? 'استلام مباشر من المكتبة (0 د.ع)' : deliveryAddress,
           notes: deliveryNote,
           items: cart,
-          subtotal: getTotal(),
+          subtotal: subtotal,
           delivery_fee: deliveryFee,
           total_price: grandTotal,
           status: 'قيد الطباعة والتجهيز 🖨️'
@@ -76,13 +84,13 @@ export default function CartPage() {
             id: uuidRetry,
             student_name: studentName,
             phone: studentPhone,
-            college: student?.college || 'جامعة ميسان',
-            stage: student?.stage || 'المرحلة الثالثة',
-            delivery_type: 'direct_delivery',
-            delivery_address: deliveryAddress,
+            college: student?.college || 'جامعات ميسان',
+            stage: student?.stage || '',
+            delivery_type: deliveryMode === 'pickup' ? 'store_pickup' : 'direct_delivery',
+            delivery_address: deliveryMode === 'pickup' ? 'استلام مباشر من المكتبة (0 د.ع)' : deliveryAddress,
             notes: `${orderId} ${deliveryNote}`.trim(),
             items: cart,
-            subtotal: getTotal(),
+            subtotal: subtotal,
             delivery_fee: deliveryFee,
             total_price: grandTotal,
             status: 'قيد الطباعة والتجهيز 🖨️'
@@ -101,10 +109,10 @@ export default function CartPage() {
         type: 'materials',
         title: `طلب استنساخ وملازم (${cart.length} أصناف)`,
         status: 'قيد الطباعة والتجهيز 🖨️',
-        address: deliveryAddress,
+        address: deliveryMode === 'pickup' ? 'استلام من المكتبة' : deliveryAddress,
         specs: `${cart.length} أصناف • إجمالي ${grandTotal.toLocaleString()} د.ع`,
         totalPrice: grandTotal,
-        period: 'اليوم (توصيل مباشر خلال ساعتين)'
+        period: deliveryMode === 'pickup' ? 'جاهز للاستلام فور انتهاء الطباعة' : 'اليوم (توصيل مباشر خلال ساعتين)'
       });
 
       // Send Instant Telegram Notification to Admin / Shop
@@ -114,10 +122,11 @@ export default function CartPage() {
         phone: studentPhone,
         college: student?.college || 'جامعات ميسان',
         stage: student?.stage || '',
-        delivery_address: deliveryAddress,
+        delivery_address: deliveryMode === 'pickup' ? 'استلام مباشر من المكتبة (0 د.ع)' : deliveryAddress,
+        delivery_mode: deliveryMode === 'pickup' ? 'استلام من المكتبة 🏬' : (isFreeDelivery ? 'توصيل لباب الكلية (مجاني 🎉)' : 'توصيل مباشر 🛵'),
         notes: deliveryNote,
         items: cart,
-        subtotal: getTotal(),
+        subtotal: subtotal,
         delivery_fee: deliveryFee,
         total_price: grandTotal,
       });
@@ -236,11 +245,83 @@ export default function CartPage() {
               ))}
             </div>
 
+            {/* Delivery Option & Free Delivery Incentive */}
+            <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-3">
+              <span className="text-xs font-bold text-slate-700 block">طريقة استلام الملازم:</span>
+              
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMode('delivery')}
+                  className={`p-3 rounded-xl border text-right transition-all flex flex-col justify-between ${
+                    deliveryMode === 'delivery'
+                      ? 'bg-emerald-50/80 border-emerald-600 text-emerald-950 shadow-sm'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-extrabold flex items-center gap-1.5">
+                      <span>🛵</span> توصيل مباشر
+                    </span>
+                    {deliveryMode === 'delivery' && <span className="w-2 h-2 rounded-full bg-emerald-600" />}
+                  </div>
+                  <span className="text-[10px] text-slate-500 block">لباب كليتك أو بيتك</span>
+                  <span className={`text-[11px] font-black mt-2 block ${isFreeDelivery ? 'text-emerald-700' : 'text-slate-800'}`}>
+                    {isFreeDelivery ? 'مجاناً 🎉' : '2,000 د.ع'}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMode('pickup')}
+                  className={`p-3 rounded-xl border text-right transition-all flex flex-col justify-between ${
+                    deliveryMode === 'pickup'
+                      ? 'bg-emerald-50/80 border-emerald-600 text-emerald-950 shadow-sm'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-extrabold flex items-center gap-1.5">
+                      <span>🏬</span> استلام من المكتبة
+                    </span>
+                    {deliveryMode === 'pickup' && <span className="w-2 h-2 rounded-full bg-emerald-600" />}
+                  </div>
+                  <span className="text-[10px] text-slate-500 block">استلمها فور جهوزيتها</span>
+                  <span className="text-[11px] font-black text-emerald-700 mt-2 block">
+                    0 د.ع (مجاناً ✨)
+                  </span>
+                </button>
+              </div>
+
+              {/* Free delivery banner */}
+              {deliveryMode === 'delivery' && (
+                isFreeDelivery ? (
+                  <div className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 flex items-center gap-2 text-xs text-emerald-800 font-bold animate-in fade-in">
+                    <span className="text-base">🎉</span>
+                    <span>مبروك! حصلت على توصيل مجاني لأن طلبك 15,000 د.ع أو أكثر.</span>
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-center justify-between text-[11px] text-amber-900 font-bold">
+                    <span>💡 أضف ملازم بقيمة {(15000 - subtotal).toLocaleString()} د.ع واحصل على توصيل مجاني!</span>
+                    <button 
+                      type="button" 
+                      onClick={() => navigate('/materials')} 
+                      className="text-amber-800 underline text-[10px] font-black hover:text-amber-950"
+                    >
+                      إضافة المزيد
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
+
             {/* Direct Delivery Address & Contact Section */}
             <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-3">
               <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800 border-b border-slate-100 pb-2">
                 <MapPin size={16} className="text-emerald-600" />
-                <span>بيانات الطالب ومكان تسليم الملازم (توصيل مباشر):</span>
+                <span>
+                  {deliveryMode === 'pickup' ? 'بيانات الطالب لاستلام الملازم من المكتبة:' : 'بيانات الطالب ومكان تسليم الملازم (توصيل مباشر):'}
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -273,19 +354,26 @@ export default function CartPage() {
                 </div>
               </div>
               
-              <div>
-                <label className="text-[11px] text-slate-500 font-bold block mb-1">
-                  حدد مكان التسليم في ميسان (باب كليتك أو عنوانك):
-                </label>
-                <input 
-                  type="text" 
-                  value={deliveryAddress} 
-                  onChange={e => setDeliveryAddress(e.target.value)} 
-                  placeholder="مثال: باب كلية الهندسة - موقع 110، أو حي المعلمين"
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-emerald-600 font-semibold"
-                  required
-                />
-              </div>
+              {deliveryMode === 'delivery' ? (
+                <div>
+                  <label className="text-[11px] text-slate-500 font-bold block mb-1">
+                    حدد مكان التسليم في ميسان (باب كليتك أو عنوانك):
+                  </label>
+                  <input 
+                    type="text" 
+                    value={deliveryAddress} 
+                    onChange={e => setDeliveryAddress(e.target.value)} 
+                    placeholder="مثال: باب كلية الهندسة - موقع 110، أو حي المعلمين"
+                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-emerald-600 font-semibold"
+                    required
+                  />
+                </div>
+              ) : (
+                <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-900 font-medium flex items-center gap-2">
+                  <span className="text-base">🏬</span>
+                  <span><strong>نقطة الاستلام:</strong> مكتبة طلاب ميسان (سيتم إشعارك عبر واتساب وتليغرام فور انتهاء الطباعة لتستلم طلبك).</span>
+                </div>
+              )}
 
               <div>
                 <label className="text-[11px] text-slate-400 block mb-1">ملاحظات الطباعة والتسليم:</label>
@@ -293,13 +381,13 @@ export default function CartPage() {
                   type="text" 
                   value={deliveryNote} 
                   onChange={e => setDeliveryNote(e.target.value)} 
-                  placeholder="مثال: يرجى التغليف بسلك أسود والاتصال عند الوصول"
+                  placeholder="مثال: يرجى التغليف بسلك أسود أو الاتصال عند الجاهزية"
                   className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
               <div className="p-2.5 bg-emerald-50 rounded-xl text-[11px] text-emerald-800 font-medium">
-                • يتم حفظ الطلب مباشرة في قاعدة البيانات وتجهيز الملازم وتوصيلها خلال ساعتين.
+                • يتم حفظ الطلب مباشرة وإشعار الإدارة والمكتبة فوراً لتجهيز الملازم.
               </div>
             </div>
 
@@ -307,11 +395,15 @@ export default function CartPage() {
             <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-2 text-xs">
               <div className="flex justify-between text-slate-600">
                 <span>مجموع الملازم والقرطاسية:</span>
-                <span className="font-bold">{getTotal().toLocaleString()} د.ع</span>
+                <span className="font-bold">{subtotal.toLocaleString()} د.ع</span>
               </div>
-              <div className="flex justify-between text-slate-600">
-                <span>أجرة التوصيل المباشر (لباب الكلية / العنوان):</span>
-                <span className="font-bold">{deliveryFee.toLocaleString()} د.ع</span>
+              <div className="flex justify-between text-slate-600 items-center">
+                <span>
+                  {deliveryMode === 'pickup' ? 'طريقة الاستلام (من المكتبة):' : 'أجرة التوصيل المباشر:'}
+                </span>
+                <span className={`font-bold ${deliveryFee === 0 ? 'text-emerald-700 font-black' : ''}`}>
+                  {deliveryFee === 0 ? (deliveryMode === 'pickup' ? 'مجاناً (0 د.ع)' : 'مجاناً 🎉 (طلبك فوق 15 ألف)') : `${deliveryFee.toLocaleString()} د.ع`}
+                </span>
               </div>
               <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-sm">
                 <span className="font-black text-slate-900">المجموع النهائي:</span>
