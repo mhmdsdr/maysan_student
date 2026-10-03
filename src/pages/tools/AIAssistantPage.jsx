@@ -65,28 +65,14 @@ export default function AIAssistantPage() {
     setLoading(true);
 
     try {
-      const systemInstruction = `أنت المساعد الأكاديمي الذكي لمنصة "طلاب ميسان". 
-اسم الطالب: ${student?.name || 'طالب ميسان'}.
-كليته: ${student?.college || 'جامعات ميسان'} (${student?.department || ''}).
-مهمتك: مساعدة الطلاب بأسلوب أكاديمي دقيق ومبسط، وتنسيق الإجابة بنقاط وجداول وعناوين واضحة تناسب الدراسة والامتحانات والتقارير الجامعية. استخدم اللغة العربية بأسلوب راقٍ.`;
+      const systemInstruction = `أنت المساعد الأكاديمي الذكي لمنصة طلاب ميسان. اسم الطالب: ${student?.name || 'طالب ميسان'}. كليته: ${student?.college || 'جامعات ميسان'} ${student?.department ? '(' + student.department + ')' : ''}. مهمتك: مساعدة الطلاب بأسلوب أكاديمي دقيق ومبسط، وتنسيق الإجابة بنقاط وعناوين واضحة تناسب الدراسة والامتحانات والتقارير الجامعية. استخدم اللغة العربية بأسلوب راقٍ.`;
 
-      const history = messages.slice(-4).map(m => ({
-        role: m.sender === 'ai' ? 'assistant' : 'user',
-        content: m.text
-      }));
+      // Use GET endpoint — avoids CORS issues in browser
+      const encodedPrompt = encodeURIComponent(query);
+      const encodedSystem = encodeURIComponent(systemInstruction);
+      const url = `https://text.pollinations.ai/${encodedPrompt}?model=openai&system=${encodedSystem}&seed=42`;
 
-      const res = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemInstruction },
-            ...history,
-            { role: 'user', content: query }
-          ],
-          model: 'openai'
-        })
-      });
+      const res = await fetch(url, { method: 'GET' });
 
       if (!res.ok) throw new Error('فشل استجابة المساعد');
       const aiReply = await res.text();
